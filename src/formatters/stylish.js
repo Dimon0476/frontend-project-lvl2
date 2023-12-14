@@ -1,59 +1,38 @@
 import _ from 'lodash';
 
-const indentSymbol = '  ';
-const keyOffset = 2;
-const prefixes = {
-  added: '+',
-  deleted: '-',
-  unmodified: ' ',
+const renderBranch = (val, depths) => {
+  if (!_.isObject(val)) return val;
+  const spaces = '  '.repeat(depths);
+  const spacesEnd = '  '.repeat(depths - 1);
+  const lines = Object.entries(val).map(([key, value]) => `${spaces}  ${key}: ${renderBranch(value, depths + 2)}`);
+  return ['{', ...lines, `${spacesEnd}}`].join('\n');
 };
-const openSymbol = '{';
-const closeSymbol = '}';
 
-const addPrefix = (symbol, indent, prefix = ' ') => `${indent}${prefix} ${symbol}`;
-
-const stringify = (node, space) => {
-  if (!_.isObject(node)) {
-    return node;
+const stringBuilder = (status, spaces, key, value, depths) => {
+  if (_.isPlainObject(value)) {
+    return `${spaces}${status} ${key}: ${renderBranch(value, depths + 2)}`;
   }
-  const nestedIndent = addPrefix(indentSymbol, space);
-  return [
-    openSymbol,
-    ...(_.entries(node).flatMap(([key, value]) => `${addPrefix(key, nestedIndent)}: ${stringify(value, nestedIndent)}`)),
-    `${addPrefix(closeSymbol, space)}`,
-  ].join('\n');
+  return `${spaces}${status} ${key}: ${value}`;
 };
 
-const makeStylish = (diffTree) => {
-  const iter = (tree, depth) => tree.flatMap((item) => {
-    const indent = indentSymbol.repeat(depth);
-    switch (item.type) {
-      case 'added':
-        return `${addPrefix(item.name, indent, prefixes.added)}: ${stringify(item.value, indent)}`;
-      case 'deleted':
-        return `${addPrefix(item.name, indent, prefixes.deleted)}: ${stringify(item.value, indent)}`;
-      case 'modified':
-        return [
-          `${addPrefix(item.name, indent, prefixes.deleted)}: ${stringify(item.value1, indent)}`,
-          `${addPrefix(item.name, indent, prefixes.added)}: ${stringify(item.value2, indent)}`,
-        ];
-      case 'unmodified':
-        return `${addPrefix(item.name, indent, prefixes.unmodified)}: ${stringify(item.value, indent)}`;
-      case 'nested':
-        return [
-          `${addPrefix(item.name, indent, prefixes.unmodified)}: ${openSymbol}`,
-          ...(iter(item.children, depth + keyOffset)),
-          `${addPrefix(closeSymbol, indent)}`,
-        ];
-      default:
-        throw new Error(`Unknown type: '${item.type}'!`);
+const renderTree = (data, depths = 1) => {
+  const spaces = '  '.repeat(depths);
+  const spacesEnd = depths > 0 ? '  '.repeat(depths).slice(0, -2) : '    '.repeat(depths);
+  const lines = data.flatMap((item) => {
+    if (item.children && item.type === 'node') return `${spaces}  ${item.key}: ${renderTree(item.children, depths + 2)}`;
+    if (item.type === 'Updated') {
+      const string1 = stringBuilder('-', spaces, item.key, item.value1, depths);
+      const string2 = stringBuilder('+', spaces, item.key, item.value2, depths);
+      return [string1, string2];
     }
+    if (item.type === 'Removed') {
+      return stringBuilder('-', spaces, item.key, item.value, depths);
+    }
+    if (item.type === 'Added') {
+      return stringBuilder('+', spaces, item.key, item.value, depths);
+    }
+    return stringBuilder(' ', spaces, item.key, item.value, depths);
   });
-  return [
-    openSymbol,
-    ...(iter(diffTree, 1)),
-    closeSymbol,
-  ];
+  return ['{', ...lines, `${spacesEnd}}`].join('\n');
 };
-
-export default (tree) => makeStylish(tree).join('\n');
+export default renderTree;

@@ -1,22 +1,13 @@
-import _ from 'lodash';
+import path from 'path';
+import fs from 'fs';
 import yaml from 'js-yaml';
-import ini from 'ini';
 
-const parseNumber = (object) => _.mapValues(object, (value) => (_.isObject(value)
-  ? parseNumber(value)
-  : Number.parseFloat(value) || value));
+const parser = (fileName) => {
+  const extension = path.extname(fileName);
+  const getPath = path.resolve(fileName);
 
-const parse = (data, inputFormat) => {
-  switch (inputFormat) {
-    case 'json':
-      return JSON.parse(data);
-    case 'yml':
-      return yaml.safeLoad(data);
-    case 'ini':
-      return parseNumber(ini.parse(data));
-    default:
-      throw new Error(`Unknown format: '${inputFormat}'!`);
-  }
+  if (extension === '.json') return JSON.parse(fs.readFileSync(getPath, 'utf8'));
+  if (extension === '.yaml' || extension === '.yml') return yaml.load(fs.readFileSync(getPath, 'utf8'));
+  throw new Error('Invalid file extantion!');
 };
-
-export default parse;
+export default parser;

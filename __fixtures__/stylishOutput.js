@@ -1,19 +1,17 @@
-{
+const stylishOutput = `{
     common: {
       + follow: false
         setting1: Value 1
       - setting2: 200
       - setting3: true
-      + setting3: {
-            key: value
-        }
+      + setting3: null
       + setting4: blah blah
       + setting5: {
             key5: value5
         }
         setting6: {
             doge: {
-              - wow: too much
+              - wow: 
               + wow: so much
             }
             key: value
@@ -36,11 +34,13 @@
         }
     }
   + group3: {
-        fee: 100500
         deep: {
             id: {
                 number: 45
             }
         }
+        fee: 100500
     }
-}
+}`;
+
+export default stylishOutput;

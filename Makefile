@@ -1,19 +1,14 @@
 install:
-	npm ci
-
+	npm ci | npm link
+gen_diff:
+	node bin/brain-games.js
+publish:
+	npm publish --dry-run
 test:
-	npm test
-
-test-coverage:
-	npm test -- --coverage --coverageProvider=v8
-
+	npx jest
+test_coverage:
+	npx jest --coverage 
+fix_lint:
+	npx eslint --no-eslintrc --config .eslintrc.yml --fix .
 lint:
-	npx eslint .
-
-fix-lint:
-	npx eslint . --fix
-
-link:
-	npm link
-
-.PHONY: test
+	npx eslint --no-eslintrc --config .eslintrc.yml .

@@ -1,39 +1,33 @@
 import _ from 'lodash';
 
-const stringify = (item) => {
-  if (_.isString(item)) {
-    return `'${item}'`;
-  }
-  if (_.isObject(item)) {
-    return '[complex value]';
-  }
-  return item;
+const quotes = (val) => {
+  if (typeof val === 'string') return `'${val}'`;
+  return _.isObject(val)
+    ? '[complex value]'
+    : val;
 };
 
-const makePlain = (diffTree) => {
-  const iter = (tree, parentNodeName) => {
-    const result = tree.flatMap((node) => {
-      const currentNodeName = node.name;
-      const propertyName = `${parentNodeName}${currentNodeName}`;
-
-      switch (node.type) {
-        case 'added':
-          return `Property '${propertyName}' was added with value: ${stringify(node.value)}`;
-        case 'deleted':
-          return `Property '${propertyName}' was removed`;
-        case 'modified':
-          return `Property '${propertyName}' was updated. From ${stringify(node.value1)} to ${stringify(node.value2)}`;
-        case 'unmodified':
-          return null;
-        case 'nested':
-          return iter(node.children, `${propertyName}.`);
-        default:
-          throw new Error(`Unknown type: '${node.type}'!`);
+const renderPlain = (data, keyPath = '') => {
+  const lines = data
+    .map((item) => {
+      switch (item.type) {
+        case ('Equal'): return 'mark';
+        case ('node'): {
+          const currentKey = `${keyPath}${item.key}.`;
+          const anotherlines = renderPlain(item.children, currentKey);
+          return anotherlines;
+        }
+        case ('Updated'): return `Property '${keyPath}${item.key}' was updated. From ${quotes(
+          item.value1,
+        )} to ${quotes(item.value2)}`;
+        case ('Removed'): return `Property '${keyPath}${item.key}' was removed`;
+        default: return `Property '${keyPath}${item.key}' was added with value: ${quotes(
+          item.value,
+        )}`;
       }
-    });
-    return result.filter((item) => item);
-  };
-  return iter(diffTree, '');
+    })
+    .filter((i) => i !== 'mark');
+  return [...lines].join('\n');
 };
 
-export default (tree) => makePlain(tree).join('\n');
+export default renderPlain;
