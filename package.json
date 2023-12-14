@@ -2,21 +2,21 @@
   "name": "@hexlet/code",
   "version": "1.0.0",
   "type": "module",
-  "description": "[![Actions Status](https://github.com/Lugonue/frontend-project-46/workflows/hexlet-check/badge.svg)](https://github.com/Lugonue/frontend-project-46/actions)",
+  "description": "[![Actions Status](https://github.com/Dimon0476/frontend-project-lvl2/workflows/hexlet-check/badge.svg)](https://github.com/Dimon0476/frontend-project-lvl2/actions)",
   "main": "src/genDiffMain.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Lugonue/frontend-project-46.git"
+    "url": "git+https://github.com/Dimon0476/frontend-project-lvl2.git"
   },
-  "author": "constantine popko",
+  "author": "Dimon76",
   "license": "ISC",
   "scripts": {
     "test": "npx jest"
   },
   "bugs": {
-    "url": "https://github.com/Lugonue/frontend-project-46/issues"
+    "url": "https://github.com/Dimon0476/frontend-project-lvl2/issues"
   },
-  "homepage": "https://github.com/Lugonue/frontend-project-46#readme",
+  "homepage": "https://github.com/Dimon0476/frontend-project-lvl2#readme",
   "dependencies": {
     "commander": "^9.4.1",
     "eslint-plugin-jest": "^27.2.1",
